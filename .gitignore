@@ -37,4 +37,8 @@ assistant-config.json
 *.tsbuildinfo
 next-env.d.ts
 
+# azure functions (not needed for Vercel deployment)
+azure-function-chat/node_modules
+azure-function-chat/dist
+
 /dist
