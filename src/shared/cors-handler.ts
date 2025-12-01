@@ -6,6 +6,13 @@
  * CORS restrictions only apply to cross-origin requests.
  */
 
+/**
+ * Normalize origin by removing trailing slashes
+ */
+function normalizeOrigin(origin: string): string {
+    return origin.replace(/\/+$/, '');
+}
+
 export function getAllowedOrigin(origin: string | null): string {
     // Same-origin requests don't send an Origin header - always allow them
     // CORS only applies to cross-origin requests
@@ -13,18 +20,32 @@ export function getAllowedOrigin(origin: string | null): string {
         return '*'; // Same-origin or no origin header - always allowed
     }
 
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-        ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+    const allowedOriginsEnv = process.env.ALLOWED_ORIGINS;
+    const allowedOrigins = allowedOriginsEnv
+        ? allowedOriginsEnv.split(',').map((o) => normalizeOrigin(o.trim()))
         : null;
 
     // If no restrictions set, allow all origins
-    if (!allowedOrigins) {
+    if (!allowedOrigins || allowedOrigins.length === 0) {
         return '*';
     }
 
+    // Normalize the incoming origin
+    const normalizedOrigin = normalizeOrigin(origin);
+
     // Check if the origin is in the allowed list
-    if (allowedOrigins.includes(origin)) {
-        return origin;
+    if (allowedOrigins.includes(normalizedOrigin)) {
+        return normalizedOrigin;
+    }
+
+    // Debug logging in development (won't appear in production)
+    if (process.env.NODE_ENV === 'development') {
+        console.log('CORS check:', {
+            origin,
+            normalizedOrigin,
+            allowedOrigins,
+            allowedOriginsEnv,
+        });
     }
 
     // Origin not in allowed list - return empty string to block
@@ -32,10 +53,20 @@ export function getAllowedOrigin(origin: string | null): string {
 }
 
 export function getCorsHeaders(origin: string | null): Record<string, string> {
-    return {
-        'Access-Control-Allow-Origin': getAllowedOrigin(origin),
+    const allowedOrigin = getAllowedOrigin(origin);
+    
+    // Don't set Access-Control-Allow-Origin if origin is blocked (empty string)
+    // Browsers will reject requests with empty Access-Control-Allow-Origin header
+    const headers: Record<string, string> = {
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '86400', // 24 hours
     };
+    
+    // Only set Access-Control-Allow-Origin if there's a valid value
+    if (allowedOrigin) {
+        headers['Access-Control-Allow-Origin'] = allowedOrigin;
+    }
+    
+    return headers;
 }
