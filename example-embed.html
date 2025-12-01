@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Embed Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .info {
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Example Page with Embedded Chatbot</h1>
+    <p>This is an example page showing how to embed the chatbot on your website.</p>
+    
+    <div class="info">
+        <h2>Embedding Instructions</h2>
+        <p>To embed the chatbot, add this script tag before the closing &lt;/body&gt; tag. The CSS will be automatically loaded:</p>
+        <pre><code>&lt;script src="path/to/chatbot.iife.js" 
+        data-api-url="https://your-api-domain.com/api/chat"
+        data-title="Chat Assistant"
+        data-placeholder="Type your message..."&gt;&lt;/script&gt;</code></pre>
+        <p><strong>Note:</strong> Make sure both <code>chatbot.iife.js</code> and <code>style.css</code> are in the same directory.</p>
+    </div>
+
+    <!-- Chatbot will be embedded here -->
+    <!-- Replace the src with the actual path to your built chatbot script -->
+    <script src="./dist/embed/chatbot.iife.js" 
+            data-api-url="/api/chat"
+            data-title="Chat Assistant"
+            data-placeholder="Type your message...">
+    </script>
+</body>
+</html>
+

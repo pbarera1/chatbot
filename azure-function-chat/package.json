@@ -1,0 +1,21 @@
+{
+  "name": "azure-function-chat",
+  "version": "1.0.0",
+  "description": "Azure Function for OpenAI Assistant Chat API",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "npm run build && func start",
+    "start:dev": "tsc --watch & func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "openai": "^6.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}
+
