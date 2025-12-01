@@ -4,14 +4,12 @@ A modern, embeddable chatbot built with React, Next.js, AI SDK, and Tailwind CSS
 
 ## Features
 
--   🤖 Powered by OpenAI GPT-4 Turbo via AI SDK
--   🎨 Beautiful UI built with Tailwind CSS
--   📦 Embeddable as a single script file
--   🔄 Real-time streaming responses
--   📝 Markdown rendering support (code blocks, lists, tables, etc.)
--   📚 RAG (Retrieval Augmented Generation) with PDF knowledge base
--   ⚡ Built with Next.js for the API route
--   🎯 TypeScript support
+-   OpenAI GPT-4 Turbo via AI SDK
+-   Embeddable as a single script file
+-   Real-time streaming responses
+-   Markdown rendering support (code blocks, lists, tables, etc.)
+-   RAG (Retrieval Augmented Generation) with PDF knowledge base
+-   Local Dev with Next.js for the API route
 
 ## Setup
 
@@ -117,8 +115,6 @@ The chatbot expects a POST endpoint at `/api/chat` that accepts:
 
 And returns a streaming response compatible with the AI SDK format.
 
-For Azure serverless deployment, you can adapt the API route in `src/app/api/chat/route.ts` to work with Azure Functions.
-
 ## Project Structure
 
 ```
@@ -145,15 +141,13 @@ The chatbot component accepts the following props:
 -   `placeholder`: Input placeholder text (default: "Type your message...")
 -   `systemPrompt`: System prompt for the AI (optional)
 
-## License
+## Potential Costs
 
-ISC
+Initial Embedding Cost
+Vector DB Hosting (Monthly)
+Query (each chat completion)
 
-Cost Factor 100MB Corpus ~1000 Pages Corpus Change
-Initial Embedding Cost $25 - $35 $10 - $20 Negligible savings
-Vector DB Hosting (Monthly) $50 - $150 $20 - $100 Minor reduction
-
-Reduce query cost can use nano/fast models or do an api call with the text embedding and summarize it, then use the smaller summary embedding to minimze the token count
+To reduce query cost could do an api call with the text embedding and summarize it, then use the smaller summary embedding to minimze the token count
 
 ## TODO
 
