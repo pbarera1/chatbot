@@ -19,10 +19,15 @@ function getAssistantId(): string {
 
 // Handle preflight OPTIONS request
 export async function OPTIONS(req: Request) {
-    const origin = req.headers.get('origin');
+    // TEMPORARY: Allow all origins
     return new Response(null, {
         status: 204,
-        headers: getCorsHeaders(origin),
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '86400',
+        },
     });
 }
 
@@ -59,15 +64,12 @@ export async function POST(req: Request) {
             }
         );
 
-        // Add CORS headers to the response
-        const origin = req.headers.get('origin');
-        const corsHeaders = getCorsHeaders(origin);
+        // TEMPORARY: Add CORS headers - allow all origins
         const headers = new Headers(response.headers);
-        Object.entries(corsHeaders).forEach(([key, value]) => {
-            if (value && typeof value === 'string') {
-                headers.set(key, value);
-            }
-        });
+        headers.set('Access-Control-Allow-Origin', '*');
+        headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        headers.set('Access-Control-Allow-Headers', 'Content-Type');
+        headers.set('Access-Control-Max-Age', '86400');
 
         return new Response(response.body, {
             status: response.status,
@@ -76,13 +78,15 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Chat API error:', error);
         const errorMessage = getErrorMessage(error);
-        const origin = req.headers.get('origin');
-        const corsHeaders = getCorsHeaders(origin);
+        // TEMPORARY: Allow all origins
         return new Response(JSON.stringify({ error: errorMessage }), {
             status: 500,
             headers: {
                 'Content-Type': 'application/json',
-                ...corsHeaders,
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Max-Age': '86400',
             },
         });
     }
