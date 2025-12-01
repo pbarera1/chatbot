@@ -7,6 +7,11 @@ export default defineConfig({
     css: {
         postcss: './postcss.config.cjs',
     },
+    define: {
+        // Replace process.env.NODE_ENV with a literal string for browser builds
+        // This prevents "process is not defined" errors in the browser
+        'process.env.NODE_ENV': JSON.stringify('production'),
+    },
     build: {
         lib: {
             entry: './src/embed/index.tsx',

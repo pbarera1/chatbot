@@ -67,9 +67,10 @@ const Chatbot: React.FC<ChatbotProps> = ({
                 </button>
             ) : (
                 <div
-                    className={`flex flex-col h-[600px] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out ${
+                    className={`flex flex-col min-h-[400px] h-[600px] max-h-[calc(100vh-2rem)] bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out ${
                         isExpanded ? 'w-[calc(100vw-2rem)] max-w-full' : 'w-96'
                     }`}
+                    style={{ height: 'min(600px, calc(100vh - 2rem))' }}
                 >
                     <div className="flex items-center justify-between px-4 py-3 bg-blue-600 text-white">
                         <h3 className="text-lg font-semibold">{title}</h3>
