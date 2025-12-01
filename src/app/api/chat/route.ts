@@ -19,14 +19,19 @@ function getAssistantId(): string {
 
 // Handle preflight OPTIONS request
 export async function OPTIONS(req: Request) {
-    // TEMPORARY: Allow all origins
+    // TEMPORARY: Allow all origins - comprehensive CORS headers
+    const origin = req.headers.get('origin');
+    // When credentials are true, must use specific origin, not *
+    const allowOrigin = origin || '*';
     return new Response(null, {
         status: 204,
         headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Origin': allowOrigin,
+            'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
+            'Access-Control-Allow-Headers':
+                'Content-Type, Authorization, X-Requested-With',
             'Access-Control-Max-Age': '86400',
+            Vary: 'Origin',
         },
     });
 }
@@ -65,11 +70,15 @@ export async function POST(req: Request) {
         );
 
         // TEMPORARY: Add CORS headers - allow all origins
+        const origin = req.headers.get('origin');
         const headers = new Headers(response.headers);
-        headers.set('Access-Control-Allow-Origin', '*');
-        headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        headers.set('Access-Control-Allow-Headers', 'Content-Type');
-        headers.set('Access-Control-Max-Age', '86400');
+        headers.set('Access-Control-Allow-Origin', origin || '*');
+        headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
+        headers.set(
+            'Access-Control-Allow-Headers',
+            'Content-Type, Authorization, X-Requested-With'
+        );
+        headers.set('Vary', 'Origin');
 
         return new Response(response.body, {
             status: response.status,
@@ -78,15 +87,17 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Chat API error:', error);
         const errorMessage = getErrorMessage(error);
+        const origin = req.headers.get('origin');
         // TEMPORARY: Allow all origins
         return new Response(JSON.stringify({ error: errorMessage }), {
             status: 500,
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Max-Age': '86400',
+                'Access-Control-Allow-Origin': origin || '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
+                'Access-Control-Allow-Headers':
+                    'Content-Type, Authorization, X-Requested-With',
+                Vary: 'Origin',
             },
         });
     }
