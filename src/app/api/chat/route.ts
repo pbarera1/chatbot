@@ -18,7 +18,15 @@ function getAssistantId(): string {
 
 // Handle preflight OPTIONS request - CORS handled by vercel.json
 export async function OPTIONS() {
-    return new Response(null, { status: 204 });
+    return new Response(null, {
+        status: 200,
+        headers: {
+            'Access-Control-Allow-Origin': 'https://kisco.kiscosl.com',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+        },
+    });
 }
 
 export async function POST(req: Request) {
@@ -54,16 +62,24 @@ export async function POST(req: Request) {
             }
         );
 
-        // CORS handled by vercel.json
-        return response;
+        // Add CORS headers to response
+        const allowedOrigin = '*';
+        const headers = new Headers(response.headers);
+        headers.set('Access-Control-Allow-Origin', allowedOrigin);
+
+        return new Response(response.body, {
+            status: response.status,
+            headers: headers,
+        });
     } catch (error) {
         console.error('Chat API error:', error);
         const errorMessage = getErrorMessage(error);
-        // CORS handled by vercel.json
+        const allowedOrigin = '*';
         return new Response(JSON.stringify({ error: errorMessage }), {
             status: 500,
             headers: {
                 'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': allowedOrigin,
             },
         });
     }
