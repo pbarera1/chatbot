@@ -16,15 +16,20 @@ function getAssistantId(): string {
     return assistantId;
 }
 
-// Handle preflight OPTIONS request - CORS handled by vercel.json
-export async function OPTIONS() {
+// Handle preflight OPTIONS request
+export async function OPTIONS(req: Request) {
+    const origin = req.headers.get('origin');
+    const allowedOrigin =
+        process.env.ALLOWED_ORIGIN || origin || 'https://kisco.kiscosl.com';
+
     return new Response(null, {
-        status: 200,
+        status: 204,
         headers: {
-            'Access-Control-Allow-Origin': 'https://kisco.kiscosl.com',
+            'Access-Control-Allow-Origin': allowedOrigin,
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization',
             'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '86400',
         },
     });
 }
@@ -62,10 +67,13 @@ export async function POST(req: Request) {
             }
         );
 
-        // Add CORS headers to response
-        const allowedOrigin = '*';
+        // Add CORS headers to response (must match OPTIONS origin when using credentials)
+        const origin = req.headers.get('origin');
+        const allowedOrigin =
+            process.env.ALLOWED_ORIGIN || origin || 'https://kisco.kiscosl.com';
         const headers = new Headers(response.headers);
         headers.set('Access-Control-Allow-Origin', allowedOrigin);
+        headers.set('Access-Control-Allow-Credentials', 'true');
 
         return new Response(response.body, {
             status: response.status,
@@ -74,12 +82,15 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Chat API error:', error);
         const errorMessage = getErrorMessage(error);
-        const allowedOrigin = '*';
+        const origin = req.headers.get('origin');
+        const allowedOrigin =
+            process.env.ALLOWED_ORIGIN || origin || 'https://kisco.kiscosl.com';
         return new Response(JSON.stringify({ error: errorMessage }), {
             status: 500,
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': allowedOrigin,
+                'Access-Control-Allow-Credentials': 'true',
             },
         });
     }
