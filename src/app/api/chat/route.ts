@@ -35,7 +35,9 @@ function getAssistantId(): string {
 
 // --- 1. Handle preflight OPTIONS request ---
 // This request MUST succeed and include the CORS headers.
-export async function OPTIONS() {
+// Note: Next.js App Router requires the Request parameter for route handlers
+export async function OPTIONS(req: Request) {
+    // Immediately return 204 with CORS headers - don't do any auth checks
     return new Response(null, {
         status: 204, // No content response for a successful preflight
         headers: {
