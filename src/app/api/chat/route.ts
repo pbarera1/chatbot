@@ -2,78 +2,83 @@ import { AssistantResponse } from 'ai';
 import { getErrorMessage } from '@/shared/error-handler';
 import { AssistantService } from '@/shared/assistant-service';
 
-// Initialize assistant service
+// Initialize assistant service (assuming this setup is correct)
 const assistantService = new AssistantService();
+
+// --- Configuration ---
+// Note: Ensure your .env file uses ALLOWED_ORIGIN (singular) to match this
+// For example: ALLOWED_ORIGIN="https://kisco.kiscosl.com"
+const FIXED_ALLOWED_ORIGIN =
+    process.env.ALLOWED_ORIGIN || 'https://kisco.kiscosl.com';
+
+// Define the common CORS headers for both OPTIONS and POST responses
+const CORS_HEADERS: HeadersInit = {
+    'Access-Control-Allow-Origin': FIXED_ALLOWED_ORIGIN,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    // Allow credentials if the client is sending cookies/auth headers
+    'Access-Control-Allow-Credentials': 'true',
+};
 
 // Get assistant ID from environment
 function getAssistantId(): string {
     const assistantId = process.env.ASSISTANT_ID;
     if (!assistantId) {
-        throw new Error(
-            'ASSISTANT_ID environment variable is not set. Please set it in your .env.local file.'
+        // Log the environment error but let the try/catch handle the response
+        console.error(
+            'ASSISTANT_ID environment variable is not set. Using fallback error.'
         );
+        throw new Error('ASSISTANT_ID environment variable is not set.');
     }
     return assistantId;
 }
 
-// Handle preflight OPTIONS request
-export async function OPTIONS(req: Request) {
-    const origin = req.headers.get('origin');
-    const allowedOrigin =
-        process.env.ALLOWED_ORIGIN || origin || 'https://kisco.kiscosl.com';
-
+// --- 1. Handle preflight OPTIONS request ---
+// This request MUST succeed and include the CORS headers.
+export async function OPTIONS() {
     return new Response(null, {
-        status: 204,
+        status: 204, // No content response for a successful preflight
         headers: {
-            'Access-Control-Allow-Origin': allowedOrigin,
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Allow-Credentials': 'true',
-            'Access-Control-Max-Age': '86400',
+            ...CORS_HEADERS,
+            // Add Max-Age for caching the preflight result
+            'Access-Control-Max-Age': '86400', // Cache for 24 hours
         },
     });
 }
 
+// --- 2. Handle POST request ---
 export async function POST(req: Request) {
     try {
         const assistantId = getAssistantId();
-
-        // Verify assistant is accessible
         await assistantService.verifyAssistant(assistantId);
 
         const input: { threadId: string | null; message: string } =
             await req.json();
 
-        // Get or create thread using shared service
         const threadId = await assistantService.getOrCreateThread(
             input.threadId
         );
 
-        // Use AssistantResponse helper which handles the useAssistant request format
+        // Use AssistantResponse to handle the chat streaming
         const response = await AssistantResponse(
             { threadId, messageId: `msg_${Date.now()}` },
             async ({ forwardStream }) => {
-                // Add user message to thread using shared service
                 await assistantService.addUserMessage(threadId, input.message);
-
-                // Create and stream the run using shared service
                 const run = assistantService.createStreamingRun(
                     threadId,
                     assistantId
                 );
-
-                // Forward the stream to the client
                 await forwardStream(run);
             }
         );
 
-        // Add CORS headers to response (must match OPTIONS origin when using credentials)
-        const origin = req.headers.get('origin');
-        const allowedOrigin =
-            process.env.ALLOWED_ORIGIN || origin || 'https://kisco.kiscosl.com';
+        // Create a new Headers object from the AssistantResponse's headers
         const headers = new Headers(response.headers);
-        headers.set('Access-Control-Allow-Origin', allowedOrigin);
-        headers.set('Access-Control-Allow-Credentials', 'true');
+
+        // Merge the standard CORS headers into the response headers
+        Object.entries(CORS_HEADERS).forEach(([key, value]) => {
+            headers.set(key, value as string);
+        });
 
         return new Response(response.body, {
             status: response.status,
@@ -82,15 +87,13 @@ export async function POST(req: Request) {
     } catch (error) {
         console.error('Chat API error:', error);
         const errorMessage = getErrorMessage(error);
-        const origin = req.headers.get('origin');
-        const allowedOrigin =
-            process.env.ALLOWED_ORIGIN || origin || 'https://kisco.kiscosl.com';
+
+        // Ensure CORS headers are included even on failure responses
         return new Response(JSON.stringify({ error: errorMessage }), {
             status: 500,
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': allowedOrigin,
-                'Access-Control-Allow-Credentials': 'true',
+                ...CORS_HEADERS,
             },
         });
     }
