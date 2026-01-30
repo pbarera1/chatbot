@@ -4,7 +4,7 @@
   "description": "Embeddable React OpenAI Chatbot",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "cross-env NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "build:embed": "vite build",
     "start": "next start",
@@ -13,17 +13,21 @@
     "update:assistant": "node scripts/update-assistant-instructions.js"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.0.0",
-    "@ai-sdk/react": "^1.0.0",
+    "@ai-sdk/mcp": "^1.0.5",
+    "@ai-sdk/openai": "^3.0.7",
+    "@ai-sdk/react": "^3.0.19",
     "@azure/functions": "^4.9.0",
-    "ai": "^4.0.0",
+    "ai": "^6.0.19",
+    "cross-env": "^10.1.0",
     "dotenv": "^16.4.5",
     "next": "^14.2.0",
     "openai": "^6.9.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-markdown": "^9.0.1",
-    "remark-gfm": "^4.0.0"
+    "recharts": "^2.15.4",
+    "remark-gfm": "^4.0.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
